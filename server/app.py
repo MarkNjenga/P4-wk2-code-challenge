@@ -21,12 +21,18 @@ db.init_app(app)
 
 api = Api(app)
 
+@app.route('/')
+def index():
+    return '<h1>Code challenge</h1>'
+
+
 class Restaurants(Resource):
     def get(self):
         restaurants = Restaurant.query.all()
         restaurant_dicts = [r.to_dict(exclude=['restaurant_pizzas']) for r in restaurants]
 
         return make_response(jsonify(restaurant_dicts), 200)
+api.add_resource(Restaurants, '/restaurants')
 
 class RestaurantByID(Resource):
     def get(self, id):
@@ -46,6 +52,7 @@ class RestaurantByID(Resource):
         else:
             return make_response(jsonify({"error": "Restaurant not found"}), 404)
 
+api.add_resource(RestaurantByID, '/restaurants/<int:id>')
 class Pizzas(Resource):
     def get(self):
         pizzas = Pizza.query.all()
@@ -53,6 +60,7 @@ class Pizzas(Resource):
 
         return make_response(jsonify(pizza_dicts), 200)
 
+api.add_resource(Pizzas, '/pizzas')
 class RestaurantByID(Resource):
     def get(self, id):
         restaurant = db.session.get(Restaurant, id)
@@ -74,8 +82,6 @@ class RestaurantByID(Resource):
 class RestaurantPizzas(Resource):
     def post(self):
         data = request.get_json()
-
-        # Price range validation
         if not 1 <= data.get('price', 0) <= 30:
             return make_response(jsonify({"errors": ["validation errors"]}), 400)
 
@@ -106,15 +112,9 @@ class RestaurantPizzas(Resource):
         else:
             return make_response(jsonify({"errors": ["Invalid pizza or restaurant ID"]}), 400)
 
-# API routes
-api.add_resource(Restaurants, '/restaurants')
-api.add_resource(RestaurantByID, '/restaurants/<int:id>')
-api.add_resource(Pizzas, '/pizzas')
 api.add_resource(RestaurantPizzas, '/restaurant_pizzas')
 
-@app.route('/')
-def index():
-    return '<h1>Code challenge</h1>'
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
