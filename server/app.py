@@ -36,14 +36,14 @@ api.add_resource(Restaurants, '/restaurants')
 
 class RestaurantByID(Resource):
     def get(self, id):
-        restaurant = Restaurant.query.get(id)
+        restaurant = db.session.get(Restaurant, id)
         if restaurant:
             return make_response(jsonify(restaurant.to_dict()), 200)
         else:
             return make_response(jsonify({"error": "Restaurant not found"}), 404)
 
     def delete(self, id):
-        restaurant = Restaurant.query.get(id)
+        restaurant = db.session.get(Restaurant, id)
         if restaurant:
             RestaurantPizza.query.filter_by(restaurant_id=id).delete()  
             db.session.delete(restaurant)
